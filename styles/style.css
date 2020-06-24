@@ -1,0 +1,8 @@
+
+.tile {
+    position: fixed;
+    width: 25px;
+    height: 25px;
+    background-color: gold;
+    border: 1px solid black;
+}

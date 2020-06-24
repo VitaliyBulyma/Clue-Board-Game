@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Clue</title>
+		<meta charset="UTF-8">
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<link rel="stylesheet" href="styles/style.css" />
+	</head>
+	<body>
+        <div id="app">
+            <div v-for="row in tiles">
+                <tile 
+                    v-for="tile in row"
+                    v-bind:type="tile.type"
+                    v-bind:x="tile.x"
+                    v-bind:y="tile.y"
+                    v-bind:key="tile.id">
+                </tile>
+            </div>
+        </div>
+        <script src="scripts/board.js"></script>
+	</body>
+</html>
