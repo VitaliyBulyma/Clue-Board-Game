@@ -105,6 +105,13 @@
                     </span>
                 </span>
             </div>
+            <div v-for="player in players">
+                <player 
+                    v-bind:type="player.type"
+                    v-bind:colour="player.colour"
+                    v-bind:key="player.id">
+                </player>
+            </div>
         </div>
         <script src="scripts/board.js"></script>
 	</body>
