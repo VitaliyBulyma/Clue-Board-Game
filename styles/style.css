@@ -10,6 +10,13 @@ img {
     height: 625px;
 }
 
+.empty {
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    opacity: 0;
+}
+
 .room {
     position: absolute;
 }
@@ -24,6 +31,7 @@ img {
     height: 25px;
     background-color: gold;
     border: 1px solid black;
+    z-index: 0.5;
 }
 
 .glow {
