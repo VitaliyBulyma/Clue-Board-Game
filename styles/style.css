@@ -17,6 +17,25 @@ img {
     opacity: 0;
 }
 
+.tileimage {
+    position: absolute;
+}
+
+.start {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border: 1px solid black;
+    z-index: 0.5;
+}
+
+.goal {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    z-index: 0.5;
+}
+
 .room {
     position: absolute;
 }

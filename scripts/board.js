@@ -40,7 +40,6 @@ Vue.component('tile',{
             //alert("You clicked on tile ("+ this.x + ", " + this.y + ")");
         }	
     }
-
 });
 
 Vue.component("empty", {
@@ -54,6 +53,130 @@ Vue.component("empty", {
         </span>
     </span>
     `,
+});
+
+Vue.component("tileimage", {
+    props:['type', 'name', 'x', 'y', 'width', 'height', 'opacity', 'src'],	
+    template:
+    //The outer if is for the rare case where the tile is empty type but the coordinate is at top left (where the image is being shown)
+    //this means it is a room component but act like a room and empty (no input, but render the image)
+    `
+    <span v-if="ispossible">
+        <span 
+            v-bind:class="'glow'"
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px', 'width':25+'px', 'height':25+'px'}"
+            v-on:click="prompt();">
+        </span>
+        <span 
+            v-bind:class="'tileimage'" 
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px', 'width':width+'px', 'height':height+'px', 'opacity':opacity, backgroundImage: 'url(' + src + ')' }">
+        </span>
+    </span>
+    <span v-else>
+        <span 
+            v-bind:class="'tileimage'" 
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px', 'width':width+'px', 'height':height+'px', 'opacity':opacity, backgroundImage: 'url(' + src + ')' }"
+            v-on:click="prompt();">
+        </span>
+    </span> 
+    `,
+    data: function () {
+        return {
+          ispossible: false
+        }
+    },
+    methods:{
+        prompt:function(){
+            //console.log(this.$parent.tiles);
+            this.ispossible = !this.ispossible;
+            //alert("You clicked on room ("+ this.x + ", " + this.y + ")");
+        }
+    }
+});
+
+Vue.component('start',{ 
+    props:['type', 'x', 'y', 'colour'],	
+    template:
+    `
+    <span v-if="ispossible">
+        <span 
+            v-bind:class="'glow'"
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px', 'width':25+'px', 'height':25+'px'}"
+            v-on:click="prompt();">
+        </span>
+        <span 
+            v-bind:class="'start'" 
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px', 'background-color':colour}">
+        </span>
+    </span>
+    <span v-else>
+        <span 
+            v-bind:class="'start'" 
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px', 'background-color':colour}"
+            v-on:click="prompt();">
+        </span>
+    </span>
+    `,
+    data: function () {
+        return {
+          ispossible: false
+        }
+    },
+    methods:{
+        prompt:function(){
+            //Must change this when the game logic is implemented
+            this.ispossible = !this.ispossible;
+            //alert("You clicked on tile ("+ this.x + ", " + this.y + ")");
+        }	
+    }
+});
+
+Vue.component('goal',{
+    props:['type', 'x', 'y'],	
+    template:
+    `
+    <span v-if="ispossible">
+        <span 
+            v-bind:class="'glow'"
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px', 'width':25+'px', 'height':25+'px'}"
+            v-on:click="prompt();">
+        </span>
+        <span 
+            v-bind:class="'goal'" 
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px'}">
+        </span>
+    </span>
+    <span v-else>
+        <span 
+            v-bind:class="'goal'" 
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px'}"
+            v-on:click="prompt();">
+        </span>
+    </span>
+    `,
+    data: function () {
+        return {
+          ispossible: false
+        }
+    },
+    methods:{
+        prompt:function(){
+            //Must change this when the game logic is implemented
+            this.ispossible = !this.ispossible;
+            if (this.ispossible){
+                this.makeGoalPossible();
+            }
+            //alert("You clicked on tile ("+ this.x + ", " + this.y + ")");
+        },
+        //Function will make this door have the whole goal area be a possible option for the player to select
+        makeGoalPossible:function() {
+            for(var x = 0; x < 5; x++) {
+                for(var y = 0; y < 7; y++) {
+                    this.$parent.$children[(9 + x) * GRID_Y + (8 + y)].ispossible = true;
+                }
+            }
+        }
+    }
 });
 
 Vue.component("room", {
@@ -181,6 +304,58 @@ var app = new Vue({
             this.tiles[x][y].width = width * 25;
             this.tiles[x][y].height = height * 25;
             this.tiles[x][y].opacity = 1;
+        },
+        createStart: function(x, y, colour) {
+            this.tiles[x][y].type = "start";
+            this.tiles[x][y].colour = colour;
+        },
+        createBorder: function() {
+            //Top Border
+            for (var x = 0; x < GRID_X; x++) {
+                if (this.tiles[x][0].type === "regular") {
+                    this.tiles[x][0].type = "empty";
+                }
+            }
+            //Left Border
+            for (var y = 0; y < GRID_Y; y++) {
+                if (this.tiles[0][y].type === "regular") {
+                    this.tiles[0][y].type = "empty";
+                }
+            }
+            //Bottom Border
+            for (var x = 0; x < GRID_X; x++) {
+                if (this.tiles[x][GRID_Y - 1].type === "regular") {
+                    this.tiles[x][GRID_Y - 1].type = "empty";
+                }
+            }
+            //Right Border
+            for (var y = 0; y < GRID_Y; y++) {
+                if (this.tiles[GRID_X - 1][y].type === "regular") {
+                    this.tiles[GRID_X - 1][y].type = "empty";
+                }
+            }           
+        },
+        createGoal: function() {
+            for(var v = 0; v < 5; v++) {
+                for(var w = 0; w < 7; w++) {
+                    this.tiles[9 + v][8 + w].type = "tileimage";
+                    this.tiles[9 + v][8 + w].name = "goal";
+                    this.tiles[9 + v][8 + w].width = 25;
+                    this.tiles[9 + v][8 + w].height = 25;
+                    //This is to make it transparent
+                    this.tiles[9 + v][8 + w].opacity = 0;
+                    this.tiles[9 + v][8 + w].src = "images/goal.png";
+                }
+            }
+            //This is for the top left of the room where it will show the whold image of the goal image
+            this.tiles[9][8].width = 125;
+            this.tiles[9][8].height = 175;
+            this.tiles[9][8].opacity = 1;
+
+            //Set the Goal tile (top middle of the image)
+            this.tiles[10][8].type = "goal";
+            this.tiles[11][8].type = "goal";
+            this.tiles[12][8].type = "goal";
         }
     },
     created: function() {
@@ -260,6 +435,16 @@ var app = new Vue({
         this.tiles[9][0].type = "empty";
         this.tiles[14][0].type = "empty";
 
+        //Set up the start position
+        this.createStart(0, 5, "purple");
+        this.createStart(0, 18, "blue");
+        this.createStart(9, 24, "green");
+        this.createStart(14, 24, "white");
+        this.createStart(23, 7, "yellow");
+        this.createStart(16, 0, "red");
+
+        this.createBorder();
+        this.createGoal();
 
     }    
 });
