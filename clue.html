@@ -9,13 +9,48 @@
 	<body>
         <div id="app">
             <div v-for="row in tiles">
-                <tile 
-                    v-for="tile in row"
-                    v-bind:type="tile.type"
-                    v-bind:x="tile.x"
-                    v-bind:y="tile.y"
-                    v-bind:key="tile.id">
-                </tile>
+                <span v-for="tile in row">
+                    <span v-if="tile.type=='regular'">
+                        <tile 
+                            v-bind:type="tile.type"
+                            v-bind:x="tile.x"
+                            v-bind:y="tile.y"
+
+                            v-bind:key="tile.id">
+                        </tile>
+                    </span>
+                    <span v-else-if="tile.type=='room'">
+                        <room
+                            v-bind:type="tile.type"
+                            v-bind:name="tile.name"
+                            v-bind:x="tile.x"
+                            v-bind:y="tile.y"
+
+                            v-bind:width="tile.width"
+                            v-bind:height="tile.height"
+                            v-bind:opacity="tile.opacity"
+                            v-bind:src="tile.src"
+                            
+                            v-bind:key="tile.id"
+                            >
+                        </room>
+                    </span>
+                    <span v-else-if="tile.type=='door'">
+                        <door
+                            v-bind:type="tile.type"
+                            v-bind:name="tile.name"
+                            v-bind:x="tile.x"
+                            v-bind:y="tile.y"
+                            v-bind:ispossible="tile.ispossible"
+                            v-bind:width="tile.width"
+                            v-bind:height="tile.height"
+                            v-bind:opacity="tile.opacity"
+                            v-bind:src="tile.src"
+                            v-bind:key="tile.id"
+                            >
+                        </door>                        
+                    </span>
+                </span>
             </div>
         </div>
         <script src="scripts/board.js"></script>
