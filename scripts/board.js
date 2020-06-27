@@ -36,11 +36,13 @@ Vue.component('tile',{
     methods:{
         prompt:function(){
             //Must change this when the game logic is implemented
-            this.ispossible = !this.ispossible;
+            //this.ispossible = !this.ispossible;
             //alert("You clicked on tile ("+ this.x + ", " + this.y + ")");
-
+            if (this.ispossible) {
+                this.$parent.getCurrentPlayer().movePlayer(this.x, this.y);
+            }
             //Test code
-            this.$parent.$children[GRID_Y * GRID_X].yourturn = true;
+            //this.$parent.$children[GRID_Y * GRID_X].yourturn = true;
         }	
     }
 });
@@ -91,7 +93,10 @@ Vue.component("tileimage", {
     methods:{
         prompt:function(){
             //console.log(this.$parent.tiles);
-            this.ispossible = !this.ispossible;
+            //this.ispossible = !this.ispossible;
+            if (this.ispossible) {
+                this.$parent.getCurrentPlayer().movePlayer(this.x, this.y);
+            }
             //alert("You clicked on room ("+ this.x + ", " + this.y + ")");
         }
     }
@@ -128,7 +133,10 @@ Vue.component('start',{
     methods:{
         prompt:function(){
             //Must change this when the game logic is implemented
-            this.ispossible = !this.ispossible;
+            //this.ispossible = !this.ispossible;
+            if (this.ispossible) {
+                this.$parent.getCurrentPlayer().movePlayer(this.x, this.y);
+            }
             //alert("You clicked on tile ("+ this.x + ", " + this.y + ")");
         }	
     }
@@ -171,10 +179,8 @@ Vue.component('goal',{
     },
     methods:{
         prompt:function(){
-            //Must change this when the game logic is implemented
-            this.ispossible = !this.ispossible;
-            if (this.ispossible){
-                this.makeGoalPossible();
+            if (this.ispossible) {
+                this.$parent.getCurrentPlayer().movePlayer(this.x, this.y);
             }
             //alert("You clicked on tile ("+ this.x + ", " + this.y + ")");
         },
@@ -230,7 +236,10 @@ Vue.component("room", {
     methods:{
         prompt:function(){
             //console.log(this.$parent.tiles);
-            this.ispossible = !this.ispossible;
+            //this.ispossible = !this.ispossible;
+            if (this.ispossible) {
+                this.$parent.getCurrentPlayer().movePlayer(this.x, this.y);
+            }
             //alert("You clicked on room ("+ this.x + ", " + this.y + ")");
         }
     }
@@ -262,16 +271,15 @@ Vue.component("door", {
     watch: {
         ispossible: function (val) {
             if (val) {
+                //console.log(this.$parent.tiles);
                 this.makeRoomPossible();
             }
         }
     },
     methods:{
         prompt:function() {
-            //console.log(this.$parent.tiles);
-            this.ispossible = !this.ispossible;
-            if (this.ispossible){
-                this.makeRoomPossible();
+            if (this.ispossible) {
+                this.$parent.getCurrentPlayer().movePlayer(this.x, this.y);
             }
         },
         //Function will make this door have the whole room be a possible option for the player to select
@@ -279,12 +287,49 @@ Vue.component("door", {
             for (var i = 0; i < GRID_X * GRID_Y; i++) {
                 //Check if the name is the same as this door name 
                     //Ex. study
-                if ((this.$parent.$children[i].type === "room" || this.$parent.$children[i].type === "door") &&
+                if ((this.$parent.$children[i].type === "room" || this.$parent.$children[i].type === "door" || this.$parent.$children[i].type === "warp") &&
                     this.$parent.$children[i].name === this.name) {
                     this.$parent.$children[i].ispossible = true;
                 }
             }
             //console.log(this.$parent.$children[this.x * 24 + this.y] === this);
+        }
+    },
+    data: function () {
+        return {
+          ispossible: false
+        }
+    }
+});
+
+Vue.component("warp", {
+    props:['type', 'name', 'x', 'y', 'width', 'height', 'opacity', 'src'],	
+    template:
+    `
+    <span v-if="ispossible">
+        <span 
+            v-bind:class="'glow'"
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px', 'width':25+'px', 'height':25+'px'}"
+            v-on:click="prompt();">
+        </span>
+        <span 
+            v-bind:class="'warp'"
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px', 'width':width+'px', 'height':height+'px', 'opacity':opacity, backgroundImage: 'url(' + src + ')' }">
+        </span>
+    </span>
+    <span v-else>
+        <span 
+            v-bind:class="'warp'"
+            v-bind:style="{'left':x*25+'px', 'top':y*25+'px', 'width':width+'px', 'height':height+'px', 'opacity':opacity, backgroundImage: 'url(' + src + ')' }"
+            v-on:click="prompt();">
+        </span>
+    </span> 
+    `,
+    methods:{
+        prompt:function() {
+            if (this.ispossible) {
+                this.$parent.getCurrentPlayer().movePlayer(this.x, this.y);
+            }
         }
     },
     data: function () {
@@ -308,8 +353,8 @@ Vue.component('player',{
     `,
     data: function () {
         return {
-            x: 4,
-            y: 8,
+            x: 2,
+            y: 3,
             yourturn: false
         }
     },
@@ -320,12 +365,12 @@ Vue.component('player',{
                 if (this.$parent.$children[this.x * GRID_Y + this.y].type === "regular" || 
                     this.$parent.$children[this.x * GRID_Y + this.y].type === "name") 
                 {
-                    this.$parent.createPath(this.x, this.y, 5, "");
+                    this.$parent.createPath(this.x, this.y, this.$parent.moveamount, "");
                 }
                 else if (this.$parent.$children[this.x * GRID_Y + this.y].type === "door" ||
                     this.$parent.$children[this.x * GRID_Y + this.y].type === "room" )
                 {
-                    //Get the name and search for all the tiles with the same name and is a door
+                    //Get the name and search for all the tiles with the same name and is a door/warp
                     var roomName = this.$parent.$children[this.x * GRID_Y + this.y].name;
                     for (var i = 0; i < GRID_X * GRID_Y; i++) {
                         if (this.$parent.$children[i].type === "door" && 
@@ -334,8 +379,25 @@ Vue.component('player',{
                             this.$parent.createPath(
                                 this.$parent.$children[i].x, 
                                 this.$parent.$children[i].y,
-                                5,
+                                this.$parent.moveamount,
                                 roomName);
+                        }
+                        else if (this.$parent.$children[i].type === "warp" && 
+                            this.$parent.$children[i].name === roomName)
+                        {
+                            //Find where the warp is leading to and just highlight the door of that room
+                            if (roomName === "study") {
+                                this.$parent.$children[19 * GRID_Y + 18].ispossible = true;
+                            }
+                            else if (roomName === "kitchen") {
+                                this.$parent.$children[6 * GRID_Y + 3].ispossible = true;
+                            }
+                            else if (roomName === "conservatory") {
+                                this.$parent.$children[17 * GRID_Y + 5].ispossible = true;
+                            }
+                            else if (roomName === "lounge") {
+                                this.$parent.$children[4 * GRID_Y + 19].ispossible = true;
+                            }
                         }
                     }
                     
@@ -347,6 +409,13 @@ Vue.component('player',{
         prompt:function(){
             //alert("You clicked on tile ("+ this.x + ", " + this.y + ")");
             console.log(this.yourturn);
+        },
+        //Move the current player to the tile[x][y]
+        movePlayer(x, y) {
+            //console.log("move");
+            this.x = x;
+            this.y = y;
+            this.$parent.clearHighlight();
         }
     }
 });
@@ -354,11 +423,37 @@ Vue.component('player',{
 //24 x 24 board
 const GRID_X = 24;
 const GRID_Y = 25;
+var NUM_PLAYER = 6;
 var app = new Vue({
     el: '#app',
     data:{
         tiles: null,
-        players: null
+        players: null,
+        moveamount: 5
+    },
+    watch: {
+        moveamount: function (val) {
+            //Start the die component
+            if (val === 0) {
+                console.log("start");
+            }
+            //Start the next player
+            else {
+                for (var i = 0; i < NUM_PLAYER; i++) {
+                    //if we loop through all the other player other than the last one then this player must have had its turn 
+                    if (i === NUM_PLAYER - 1) {
+                        this.$children[GRID_X * GRID_Y + i + 1].yourturn = false;
+                        this.$children[GRID_X * GRID_Y].yourturn = true;
+                    }
+                    //We know that the player children start right after the grid
+                    else if (this.$children[GRID_X * GRID_Y + i].yourturn) {
+                        this.$children[GRID_X * GRID_Y + i].yourturn = false;
+                        this.$children[GRID_X * GRID_Y + i + 1].yourturn = true;
+                        break;
+                    }
+                }
+            }
+        }
     },
     methods: {
         createRoom: function(name, x, y, width, height, imageSrc) {
@@ -457,6 +552,21 @@ var app = new Vue({
             this.highlightPath(x + 1, y, amount - 1, avoidName);
             this.highlightPath(x, y + 1, amount - 1, avoidName);
             //this.$parent.$children[x * GRID_Y + y].ispossible = true;
+        },
+        getCurrentPlayer: function() {
+            for (var i = this.$children.length - 1; i >= GRID_X * GRID_Y; i++) {
+                if (this.$children[i].yourturn) {
+                    return this.$children[i];
+                }
+            }
+        },
+        clearHighlight: function() {
+            for (var i = 0; i < GRID_X * GRID_Y; i++) {
+                if (this.$children[i].ispossible) {
+                    this.$children[i].ispossible = false;
+                }
+            }
+            this.moveamount = 0;
         }
     },
     created: function() {
@@ -476,6 +586,7 @@ var app = new Vue({
         this.createRoom("study", 0, 0, 7, 4, "images/study.png");
         this.tiles[6][3].type = "door";
         this.tiles[6][0].type = "empty";
+        this.tiles[0][3].type = "warp";
 
         //Set up the library room
         this.createRoom("library", 0, 6, 7, 5, "images/library.png");
@@ -496,6 +607,7 @@ var app = new Vue({
         this.tiles[4][19].type = "door";
         this.tiles[5][19].type = "regular";
         this.tiles[0][19].type = "empty";
+        this.tiles[1][19].type = "warp";
 
         //Set up the ball room
         this.createRoom("ball", 8, 17, 8, 8, "images/ball.png");
@@ -513,6 +625,8 @@ var app = new Vue({
         //Set up the kitchen
         this.createRoom("kitchen", 18, 18, 6, 6, "images/kitchen.png");
         this.tiles[19][18].type = "door";
+        this.tiles[23][18].type = "empty";
+        this.tiles[18][23].type = "warp";
 
         //Set up the dining room
         this.createRoom("dining", 16, 9, 8, 7, "images/dining.png");
@@ -526,6 +640,7 @@ var app = new Vue({
         this.createRoom("lounge", 17, 0, 7, 6, "images/lounge.png");
         this.tiles[17][5].type = "door";
         this.tiles[17][0].type = "empty";
+        this.tiles[23][5].type = "warp";
 
         //Set up the hall
         this.createRoom("hall", 9, 0, 6, 7, "images/hall.png");
@@ -549,6 +664,9 @@ var app = new Vue({
 
         this.players = [];
         this.players.push({id:GRID_X * GRID_Y + 1 , type: "player", colour: "green"});
-
+    },
+    mounted: function() {
+        //Have the first player go first
+        this.$children[GRID_X * GRID_Y].yourturn = true;
     }
 });

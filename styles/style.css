@@ -44,6 +44,10 @@ img {
     position: absolute;
 }
 
+.warp {
+    position: absolute;
+}
+
 .tile {
     position: absolute;
     width: 25px;
