@@ -353,8 +353,8 @@ Vue.component('player',{
     `,
     data: function () {
         return {
-            x: 2,
-            y: 3,
+            x: 9,
+            y: 24,
             yourturn: false
         }
     },
@@ -363,7 +363,7 @@ Vue.component('player',{
             if (val) {
                 //Create path on a regular tile
                 if (this.$parent.$children[this.x * GRID_Y + this.y].type === "regular" || 
-                    this.$parent.$children[this.x * GRID_Y + this.y].type === "name") 
+                    this.$parent.$children[this.x * GRID_Y + this.y].type === "start") 
                 {
                     this.$parent.createPath(this.x, this.y, this.$parent.moveamount, "");
                 }
@@ -416,33 +416,76 @@ Vue.component('player',{
             this.x = x;
             this.y = y;
             this.$parent.clearHighlight();
+
+            //Here we have to determine if the player can make a guess or find a clue
+            this.$parent.moveamount = 0;
+
         }
+    }
+});
+
+Vue.component('dice',{
+    props:[],	
+    template:
+    `
+    <div v-bind:class="'diceBoard'" v-on:click="prompt();">
+        <div v-bind:class="'die'">
+            <div v-bind:class="'dieValue' +  die1value">
+                <div v-bind:class="'dot'" v-for="index in die1value"></div>
+            </div>
+        </div>
+        <div v-bind:class="'die'">
+            <div v-bind:class="'dieValue' +  die2value">
+                <div v-bind:class="'dot'" v-for="index in die2value"></div>
+            </div>
+        </div>
+        <div v-bind:class="'diceMessage'" v-if="diceamount == 0">
+            Please click within the box to roll the dice 
+        </div>
+    </div>
+    `,
+    data: function () {
+        return {
+          diceamount: 0,
+          die1value: 1,
+          die2value: 1
+        }
+    },
+    methods:{
+        prompt:function(){
+            if (this.diceamount === 0) {
+                this.die1value = Math.floor(Math.random() * 6) + 1;
+                this.die2value = Math.floor(Math.random() * 6) + 1;   
+                this.diceamount = this.die1value + this.die2value;
+                this.$parent.moveamount = this.diceamount;
+            }    
+        }	
     }
 });
 
 //24 x 24 board
 const GRID_X = 24;
 const GRID_Y = 25;
-var NUM_PLAYER = 6;
+var NUM_PLAYER = 2;
 var app = new Vue({
     el: '#app',
     data:{
         tiles: null,
         players: null,
-        moveamount: 5
+        moveamount: 0
     },
     watch: {
         moveamount: function (val) {
             //Start the die component
             if (val === 0) {
-                console.log("start");
+                this.$children[GRID_X * GRID_Y + NUM_PLAYER].diceamount = 0;
             }
             //Start the next player
             else {
                 for (var i = 0; i < NUM_PLAYER; i++) {
                     //if we loop through all the other player other than the last one then this player must have had its turn 
                     if (i === NUM_PLAYER - 1) {
-                        this.$children[GRID_X * GRID_Y + i + 1].yourturn = false;
+                        this.$children[GRID_X * GRID_Y + i].yourturn = false;
                         this.$children[GRID_X * GRID_Y].yourturn = true;
                     }
                     //We know that the player children start right after the grid
@@ -554,9 +597,9 @@ var app = new Vue({
             //this.$parent.$children[x * GRID_Y + y].ispossible = true;
         },
         getCurrentPlayer: function() {
-            for (var i = this.$children.length - 1; i >= GRID_X * GRID_Y; i++) {
-                if (this.$children[i].yourturn) {
-                    return this.$children[i];
+            for (var i = 0; i < NUM_PLAYER; i++) {
+                if (this.$children[GRID_X * GRID_Y + i].yourturn) {
+                    return this.$children[GRID_X * GRID_Y + i];
                 }
             }
         },
@@ -566,7 +609,6 @@ var app = new Vue({
                     this.$children[i].ispossible = false;
                 }
             }
-            this.moveamount = 0;
         }
     },
     created: function() {
@@ -664,6 +706,8 @@ var app = new Vue({
 
         this.players = [];
         this.players.push({id:GRID_X * GRID_Y + 1 , type: "player", colour: "green"});
+        this.players.push({id:GRID_X * GRID_Y + 1 , type: "player", colour: "red"});
+
     },
     mounted: function() {
         //Have the first player go first

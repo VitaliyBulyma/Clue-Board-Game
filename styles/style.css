@@ -4,12 +4,136 @@ img {
 }
 
 #app {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.board {
     position: relative;
     margin: 0 auto;
     width: 625px;
     height: 625px;
+    flex: 1 0 0;
 }
 
+.dice {
+    flex: 1 0 0;
+}
+
+.diceBoard {
+    background-color: grey;
+    padding: 10px;
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.diceMessage {
+    flex: 1 0 0;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-size: 24px;
+    margin: auto;
+}
+
+/*
+*************************************************
+Styling of the Die 
+*************************************************
+*/
+.die {
+    width: 50px;
+    height: 50px;
+    background-color: rgb(47, 230, 47);
+    text-align: center;
+    margin: 0 10px;
+}
+
+.dieValue1, .dieValue2, .dieValue3, .dieValue4, .dieValue5, .dieValue6 {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background-color: black;
+    border-radius: 50%;
+    position: absolute;
+}
+
+/* Middle Dot */
+.dieValue1 .dot, .dieValue3 .dot, .dieValue5 .dot {
+    top: calc(50% - 5px);
+    left: calc(50% - 5px);
+}
+
+/* Top Left Dot */
+.dieValue2 .dot:first-child, .dieValue4 .dot:first-child, .dieValue5 .dot:nth-child(2) {
+    top: 10px;
+    left: 10px;
+}
+
+/* Bottom Right Dot */
+.dieValue2 .dot:nth-child(2), .dieValue4 .dot:nth-child(2), .dieValue5 .dot:nth-child(3) {
+    top: calc(100% - 20px);
+    left: calc(100% - 20px);
+}
+
+/* Top Right Dot */
+.dieValue3 .dot:nth-child(2), .dieValue4 .dot:nth-child(3), .dieValue5 .dot:nth-child(4) {
+    top: 10px;
+    left: calc(100% - 20px);
+}
+
+/* Bottom Left Dot */
+.dieValue3 .dot:nth-child(3), .dieValue4 .dot:nth-child(4), .dieValue5 .dot:nth-child(5) {
+    top: calc(100% - 20px);
+    left: 10px;
+}
+
+/* Top Left Dot (A little higher) */
+.dieValue6 .dot:first-child {
+    top: 5px;
+    left: 10px;
+}
+
+/* Bottom Right Dot (A little lower) */
+.dieValue6 .dot:nth-child(2) {
+    top: calc(100% - 15px);
+    left: calc(100% - 20px);
+}
+
+/* Top Right Dot (A little higher) */
+.dieValue6 .dot:nth-child(3) {
+    top: 5px;
+    left: calc(100% - 20px);
+}
+
+/* Bottom Left Dot (A little lower) */
+.dieValue6 .dot:nth-child(4) {
+    top: calc(100% - 15px);
+    left: 10px;
+}
+
+/* Middle Left Dot */
+.dieValue6 .dot:nth-child(5) {
+    top: calc(50% - 5px);
+    left: 10px;
+}
+
+/* Middle Rightt Dot */
+.dieValue6 .dot:nth-child(6) {
+    top: calc(50% - 5px);
+    left: calc(100% - 20px);
+}
+
+/*
+*************************************************
+ Styling of the Game Board Tiles and Player 
+**************************************************
+*/
 .empty {
     width: 25px;
     height: 25px;
