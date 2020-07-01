@@ -81,8 +81,14 @@ Styling of the Game
     flex: 1 0 0;
 }
 
-.dice {
+.menu {
     flex: 1 0 0;
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.dice {
+    flex: 1 0 100%;
 }
 
 .diceBoard {
@@ -193,6 +199,28 @@ Styling of the Die
     top: calc(50% - 5px);
     left: calc(100% - 20px);
 }
+
+
+/*
+*************************************************
+Styling of the Suggestion 
+*************************************************
+*/
+.suggestion {
+    flex: 1 0 100%;
+    background-color: #D2B48C;
+}
+
+.suggestion > * {
+    margin: 0 auto;
+    text-align: center;
+}
+
+.suggestionQuestion {
+    font-size: 24px;
+    margin-bottom: 1em;
+}
+
 
 /*
 *************************************************

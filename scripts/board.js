@@ -484,6 +484,55 @@ Vue.component('dice',{
     }
 });
 
+Vue.component('suggestion', {
+    props:[],	
+    template:
+    `
+    <div>
+        <h2>Make Suggestion</h2>
+        <div v-bind:class="'suggestionQuestion'">
+            <label>Please select a charcter</label>
+            <select v-model="charname">
+                <option value='red'>Miss Scarlet</option>
+                <option value='yellow'>Colonel Mustard</option>
+                <option value='green'>Mr.Green</option>
+                <option value='blue'>Mrs.Peacock</option>
+                <option value='purple'>Professor Plum</option>
+                <option value='white'>Mrs.White</option>
+            </select>
+        </div>
+        <div v-bind:class="'suggestionQuestion'">
+            <label>Please select a weapon</label>
+            <select v-model="weaponname">
+                <option value='rope'>Rope</option>
+                <option value='leadpipe'>Lead Pipe</option>
+                <option value='knife'>Knife</option>
+                <option value='wrench'>Wrench</option>
+                <option value='candlestick'>Candlestick</option>
+                <option value='revolver'>Revolver</option>
+            </select>
+        </div>
+        <div v-bind:class="'suggestionQuestion'">
+        <label>Room name: {{ roomname }}</label>
+        </div>
+        <button v-on:click="makeSuggestion();">Make Suggestion</button>
+    </div>
+    `,
+    data: function () {
+        return {
+          charname: 'green',
+          weaponname: 'revolver',
+          roomname: 'hall'
+        }
+    },
+    methods:{
+        makeSuggestion: function() {
+            console.log(this.charname);
+
+        }
+    }
+});
+
 Vue.component('startmenu', {
     props:[],	
     template:
@@ -524,7 +573,7 @@ Vue.component('startmenu', {
                 
             </ul>
         </div>       
-        <button v-on:click="startgame();">Start Game</button>
+        <button v-on:click="startGame();">Start Game</button>
     </div>
     `,
     data: function () {
@@ -540,7 +589,7 @@ Vue.component('startmenu', {
             //Must have a new memory location
             this.selectcolor.splice(index, 1, colour);
         },
-        startgame: function() {
+        startGame: function() {
             //Must validate the color
             var checkColour = [this.selectcolor[0]];
             for (var i = 1; i < this.numplayers; i++) {
@@ -555,6 +604,7 @@ Vue.component('startmenu', {
             for (var i = 0; i < this.numplayers; i++) {
                 this.$parent.players.push({type: "player", colour: this.selectcolor[i]});
             }
+            NUM_PLAYER = this.numplayers;
         }
     }
 });
@@ -678,12 +728,24 @@ var app = new Vue({
             if (amount <= 0 || x < 0 || x >= GRID_X || y < 0 || y >= GRID_Y)  {
                 return;
             }
-            if (this.$children[x * GRID_Y + y].type === "regular" ||
+            //Must check if there is a no player their (player can block path)
+            if (this.$children[x * GRID_Y + y].type === "regular") {
+                for (var i = 0; i < NUM_PLAYER; i++) {
+                    if (this.$children[GRID_X * GRID_Y + i].x === x &&
+                        this.$children[GRID_X * GRID_Y + i].y === y) {
+                            return;
+                        }
+                }
+                //No player on this tile
+                this.$children[x * GRID_Y + y].ispossible = true;
+            }
+            else if (
             (this.$children[x * GRID_Y + y].type === "door" && this.$children[x * GRID_Y + y].name != avoidName) || 
             this.$children[x * GRID_Y + y].type === "start" || 
             this.$children[x * GRID_Y + y].type === "goal") {
                 this.$children[x * GRID_Y + y].ispossible = true;
             }
+            //No tile to step on
             else {
                 return;
             }
