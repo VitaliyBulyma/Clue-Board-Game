@@ -3,7 +3,72 @@ img {
     height: auto;
 }
 
-#app {
+/*
+*************************************************
+Styling of the Start Menu
+*************************************************
+*/
+
+.errormessage {
+    color: red;
+}
+
+.colorselect {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.playernumber {
+    flex: 1 0 100%;
+}
+
+.colourlabel {
+    margin: auto 0;
+}
+
+.colorOption {
+    display: inline-block;
+    padding-left: 0;
+    margin: 0;
+}
+
+.colorOption li {
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+    border: 1px solid black;
+}
+
+.notselect {
+    opacity: 0.25;
+}
+
+
+.red {
+    background-color: red;
+}
+.yellow {
+    background-color: yellow;
+}
+.green {
+    background-color: green;
+}
+.blue {
+    background-color: blue;
+}
+.purple {
+    background-color: purple;
+}
+.white {
+    background-color: white;
+}
+
+/*
+*************************************************
+Styling of the Game 
+*************************************************
+*/
+.game {
     display: flex;
     flex-flow: row wrap;
 }

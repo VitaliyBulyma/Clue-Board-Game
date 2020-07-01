@@ -419,7 +419,33 @@ Vue.component('player',{
 
             //Here we have to determine if the player can make a guess or find a clue
             this.$parent.moveamount = 0;
-
+        }
+    },
+    created: function() {
+        //Move the player to the start position depending on their colour
+        if (this.colour === "red") {
+            this.x = 16;
+            this.y = 0;
+        }
+        else if (this.colour === "yellow") {
+            this.x = 23;
+            this.y = 7;
+        }
+        else if (this.colour === "green") {
+            this.x = 9;
+            this.y = 24;
+        }
+        else if (this.colour === "blue") {
+            this.x = 0;
+            this.y = 18;
+        }
+        else if (this.colour === "purple") {
+            this.x = 0;
+            this.y = 5;
+        }
+        else {
+            this.x = 14;
+            this.y = 24;
         }
     }
 });
@@ -432,11 +458,6 @@ Vue.component('dice',{
         <div v-bind:class="'die'">
             <div v-bind:class="'dieValue' +  die1value">
                 <div v-bind:class="'dot'" v-for="index in die1value"></div>
-            </div>
-        </div>
-        <div v-bind:class="'die'">
-            <div v-bind:class="'dieValue' +  die2value">
-                <div v-bind:class="'dot'" v-for="index in die2value"></div>
             </div>
         </div>
         <div v-bind:class="'diceMessage'" v-if="diceamount == 0">
@@ -455,11 +476,86 @@ Vue.component('dice',{
         prompt:function(){
             if (this.diceamount === 0) {
                 this.die1value = Math.floor(Math.random() * 6) + 1;
-                this.die2value = Math.floor(Math.random() * 6) + 1;   
-                this.diceamount = this.die1value + this.die2value;
+                //this.die2value = Math.floor(Math.random() * 6) + 1;   
+                this.diceamount = this.die1value;// + this.die2value;
                 this.$parent.moveamount = this.diceamount;
             }    
         }	
+    }
+});
+
+Vue.component('startmenu', {
+    props:[],	
+    template:
+    `
+    <div>
+        <div>
+            <label>Please select the number of players:</label>
+            <select v-model="numplayers">
+                <option :value=2>2</option>
+                <option :value=3>3</option>
+                <option :value=4>4</option>
+                <option :value=5>5</option>
+                <option :value=6>6</option>
+            </select>
+        </div>
+        <div v-if="showerror" v-bind:class="'errormessage'">All player must have different colour</div>
+        <div v-bind:class="'colorselect'" v-for="index in numplayers">
+            <p v-bind:class="'playernumber'">Player {{ index }}</p>
+            <label v-bind:class="'colourlabel'">Select a colour: </label>
+            <ul v-bind:class="'colorOption'">
+                <li v-if="selectcolor[index - 1] == 'red'" v-bind:class="'red'"></li>
+                <li v-else v-bind:class="'red notselect'" v-on:click="selectColour(index - 1, 'red');"></li>
+
+                <li v-if="selectcolor[index - 1] == 'yellow'" v-bind:class="'yellow'"></li>
+                <li v-else v-bind:class="'yellow notselect'" v-on:click="selectColour(index - 1, 'yellow');"></li>
+                
+                <li v-if="selectcolor[index - 1] == 'green'" v-bind:class="'green'"></li>
+                <li v-else v-bind:class="'green notselect'" v-on:click="selectColour(index - 1, 'green');"></li>
+                
+                <li v-if="selectcolor[index - 1] == 'blue'" v-bind:class="'blue'"></li>
+                <li v-else v-bind:class="'blue notselect'" v-on:click="selectColour(index - 1, 'blue');"></li>
+                
+                <li v-if="selectcolor[index - 1] == 'purple'" v-bind:class="'purple'"></li>
+                <li v-else v-bind:class="'purple notselect'" v-on:click="selectColour(index - 1, 'purple');"></li>
+                
+                <li v-if="selectcolor[index - 1] == 'white'" v-bind:class="'white'"></li>
+                <li v-else v-bind:class="'white notselect'" v-on:click="selectColour(index - 1, 'white');"></li>
+                
+            </ul>
+        </div>       
+        <button v-on:click="startgame();">Start Game</button>
+    </div>
+    `,
+    data: function () {
+        return {
+            numplayers: 2,
+            selectcolor: ['red', 'yellow', 'green', 'blue', 'purple', 'white'],
+            showerror: false
+        }
+    },
+    methods:{
+        selectColour: function(index, colour) {
+            //Cannot use the traditional assignment due to Vue will not update to the view
+            //Must have a new memory location
+            this.selectcolor.splice(index, 1, colour);
+        },
+        startgame: function() {
+            //Must validate the color
+            var checkColour = [this.selectcolor[0]];
+            for (var i = 1; i < this.numplayers; i++) {
+                if (checkColour.includes(this.selectcolor[i])) {
+                    this.showerror = true;
+                    return;
+                }
+                checkColour.push(this.selectcolor[i]);
+            }
+            this.$parent.gameloop = true;
+            //Set up the player data    
+            for (var i = 0; i < this.numplayers; i++) {
+                this.$parent.players.push({type: "player", colour: this.selectcolor[i]});
+            }
+        }
     }
 });
 
@@ -472,7 +568,8 @@ var app = new Vue({
     data:{
         tiles: null,
         players: null,
-        moveamount: 0
+        moveamount: 0,
+        gameloop: false
     },
     watch: {
         moveamount: function (val) {
@@ -705,12 +802,9 @@ var app = new Vue({
         this.createGoal();
 
         this.players = [];
-        this.players.push({id:GRID_X * GRID_Y + 1 , type: "player", colour: "green"});
-        this.players.push({id:GRID_X * GRID_Y + 1 , type: "player", colour: "red"});
-
     },
     mounted: function() {
         //Have the first player go first
-        this.$children[GRID_X * GRID_Y].yourturn = true;
+        //this.$children[GRID_X * GRID_Y].yourturn = true;
     }
 });

@@ -8,19 +8,75 @@
 	</head>
 	<body>
         <div id="app">
-            <div class="board">
-                <div v-for="row in tiles">
-                    <span v-for="tile in row">
-                        <span v-if="tile.type=='regular'">
-                            <tile 
-                                v-bind:type="tile.type"
-                                v-bind:x="tile.x"
-                                v-bind:y="tile.y"
-                                v-bind:key="tile.id">
-                            </tile>
-                        </span>
-                        <span v-else-if="tile.type=='empty'">
-                            <span v-if="tile.name=='library' || tile.name=='conservatory' || tile.name=='lounge' || tile.name=='hall'">
+            <div v-if="gameloop" class="game">
+                <div class="board">
+                    <div v-for="row in tiles">
+                        <span v-for="tile in row">
+                            <span v-if="tile.type=='regular'">
+                                <tile 
+                                    v-bind:type="tile.type"
+                                    v-bind:x="tile.x"
+                                    v-bind:y="tile.y"
+                                    v-bind:key="tile.id">
+                                </tile>
+                            </span>
+                            <span v-else-if="tile.type=='empty'">
+                                <span v-if="tile.name=='library' || tile.name=='conservatory' || tile.name=='lounge' || tile.name=='hall'">
+                                    <room
+                                        v-bind:type="tile.type"
+                                        v-bind:name="tile.name"
+                                        v-bind:x="tile.x"
+                                        v-bind:y="tile.y"
+                                        v-bind:width="tile.width"
+                                        v-bind:height="tile.height"
+                                        v-bind:opacity="tile.opacity"
+                                        v-bind:src="tile.src"
+                                        v-bind:key="tile.id"
+                                        >
+                                    </room>
+                                </span>
+                                <span v-else>
+                                    <empty 
+                                        v-bind:type="tile.type"
+                                        v-bind:name="tile.name"
+                                        v-bind:x="tile.x"
+                                        v-bind:y="tile.y"
+                                        v-bind:key="tile.id">
+                                    </empty>
+                                </span>
+                            </span>
+                            <span v-else-if="tile.type=='tileimage'">
+                                <tileimage
+                                    v-bind:type="tile.type"
+                                    v-bind:name="tile.name"
+                                    v-bind:x="tile.x"
+                                    v-bind:y="tile.y"
+                                    v-bind:width="tile.width"
+                                    v-bind:height="tile.height"
+                                    v-bind:opacity="tile.opacity"
+                                    v-bind:src="tile.src"
+                                    v-bind:key="tile.id"
+                                    >
+                                </tileimage>
+                            </span>
+                            <span v-else-if="tile.type=='start'">
+                                <start 
+                                    v-bind:type="tile.type"
+                                    v-bind:x="tile.x"
+                                    v-bind:y="tile.y"
+                                    v-bind:colour="tile.colour"
+                                    v-bind:key="tile.id">
+                                </start>
+                            </span>
+                            <span v-else-if="tile.type=='goal'">
+                                <goal 
+                                    v-bind:type="tile.type"
+                                    v-bind:x="tile.x"
+                                    v-bind:y="tile.y"
+                                    v-bind:key="tile.id">
+                                </goal>
+                            </span>
+                            <span v-else-if="tile.type=='room'">
                                 <room
                                     v-bind:type="tile.type"
                                     v-bind:name="tile.name"
@@ -34,104 +90,55 @@
                                     >
                                 </room>
                             </span>
-                            <span v-else>
-                                <empty 
+                            <span v-else-if="tile.type=='door'">
+                                <door
                                     v-bind:type="tile.type"
                                     v-bind:name="tile.name"
                                     v-bind:x="tile.x"
                                     v-bind:y="tile.y"
-                                    v-bind:key="tile.id">
-                                </empty>
+                                    v-bind:ispossible="tile.ispossible"
+                                    v-bind:width="tile.width"
+                                    v-bind:height="tile.height"
+                                    v-bind:opacity="tile.opacity"
+                                    v-bind:src="tile.src"
+                                    v-bind:key="tile.id"
+                                    >
+                                </door>                        
+                            </span>
+                            <span v-else-if="tile.type=='warp'">
+                                <warp
+                                    v-bind:type="tile.type"
+                                    v-bind:name="tile.name"
+                                    v-bind:x="tile.x"
+                                    v-bind:y="tile.y"
+                                    v-bind:ispossible="tile.ispossible"
+                                    v-bind:width="tile.width"
+                                    v-bind:height="tile.height"
+                                    v-bind:opacity="tile.opacity"
+                                    v-bind:src="tile.src"
+                                    v-bind:key="tile.id"
+                                    >
+                                </warp>                        
                             </span>
                         </span>
-                        <span v-else-if="tile.type=='tileimage'">
-                            <tileimage
-                                v-bind:type="tile.type"
-                                v-bind:name="tile.name"
-                                v-bind:x="tile.x"
-                                v-bind:y="tile.y"
-                                v-bind:width="tile.width"
-                                v-bind:height="tile.height"
-                                v-bind:opacity="tile.opacity"
-                                v-bind:src="tile.src"
-                                v-bind:key="tile.id"
-                                >
-                            </tileimage>
-                        </span>
-                        <span v-else-if="tile.type=='start'">
-                            <start 
-                                v-bind:type="tile.type"
-                                v-bind:x="tile.x"
-                                v-bind:y="tile.y"
-                                v-bind:colour="tile.colour"
-                                v-bind:key="tile.id">
-                            </start>
-                        </span>
-                        <span v-else-if="tile.type=='goal'">
-                            <goal 
-                                v-bind:type="tile.type"
-                                v-bind:x="tile.x"
-                                v-bind:y="tile.y"
-                                v-bind:key="tile.id">
-                            </goal>
-                        </span>
-                        <span v-else-if="tile.type=='room'">
-                            <room
-                                v-bind:type="tile.type"
-                                v-bind:name="tile.name"
-                                v-bind:x="tile.x"
-                                v-bind:y="tile.y"
-                                v-bind:width="tile.width"
-                                v-bind:height="tile.height"
-                                v-bind:opacity="tile.opacity"
-                                v-bind:src="tile.src"
-                                v-bind:key="tile.id"
-                                >
-                            </room>
-                        </span>
-                        <span v-else-if="tile.type=='door'">
-                            <door
-                                v-bind:type="tile.type"
-                                v-bind:name="tile.name"
-                                v-bind:x="tile.x"
-                                v-bind:y="tile.y"
-                                v-bind:ispossible="tile.ispossible"
-                                v-bind:width="tile.width"
-                                v-bind:height="tile.height"
-                                v-bind:opacity="tile.opacity"
-                                v-bind:src="tile.src"
-                                v-bind:key="tile.id"
-                                >
-                            </door>                        
-                        </span>
-                        <span v-else-if="tile.type=='warp'">
-                            <warp
-                                v-bind:type="tile.type"
-                                v-bind:name="tile.name"
-                                v-bind:x="tile.x"
-                                v-bind:y="tile.y"
-                                v-bind:ispossible="tile.ispossible"
-                                v-bind:width="tile.width"
-                                v-bind:height="tile.height"
-                                v-bind:opacity="tile.opacity"
-                                v-bind:src="tile.src"
-                                v-bind:key="tile.id"
-                                >
-                            </warp>                        
-                        </span>
-                    </span>
+                    </div>
+                    <div v-for="player in players">
+                        <player 
+                            v-bind:type="player.type"
+                            v-bind:colour="player.colour"
+                            v-bind:key="player.id">
+                        </player>
+                    </div>
                 </div>
-                <div v-for="player in players">
-                    <player 
-                        v-bind:type="player.type"
-                        v-bind:colour="player.colour"
-                        v-bind:key="player.id">
-                    </player>
+                <div class="dice">
+                    <dice>
+                    </dice>
                 </div>
             </div>
-            <div class="dice">
-                <dice>
-                </dice>
+            <div v-else>
+                <startmenu>
+
+                </startmenu>
             </div>
         </div>
         <script src="scripts/board.js"></script>
