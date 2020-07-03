@@ -1,10 +1,14 @@
+//This is a regular tile on the game board (yellow tile)
 Vue.component('tile',{
     //x and y will be the position
     //type will be the tile type on the board:
         //regular
+        //room
         //door
         //warp
-        //wall
+        //empty
+        //start
+        //goal
     //isPossible will be if the player can move to this square    
     props:['type', 'x', 'y'],	
     template:
@@ -47,6 +51,7 @@ Vue.component('tile',{
     }
 });
 
+//Empty tile that is there for rendering only and take a space in the list of tiles to make it easier to keep track
 Vue.component("empty", {
     props:['type', 'x', 'y'],	
     template:
@@ -60,6 +65,7 @@ Vue.component("empty", {
     `,
 });
 
+//Image of tile (for now only used in the goal tile) basically almost like a empty but has more functionality like player can actually land on it (goal area)
 Vue.component("tileimage", {
     props:['type', 'name', 'x', 'y', 'width', 'height', 'opacity', 'src'],	
     template:
@@ -102,6 +108,7 @@ Vue.component("tileimage", {
     }
 });
 
+//Start tile for the character
 Vue.component('start',{ 
     props:['type', 'x', 'y', 'colour'],	
     template:
@@ -142,6 +149,7 @@ Vue.component('start',{
     }
 });
 
+//Goal tile for the board (big red staircase of the base [top most])
 Vue.component('goal',{
     props:['type', 'x', 'y'],	
     template:
@@ -195,6 +203,7 @@ Vue.component('goal',{
     }
 });
 
+//Room tile (image is rendered on the top left most and the rest are opacity 0)
 Vue.component("room", {
     props:['type', 'name', 'x', 'y', 'width', 'height', 'opacity', 'src'],	
     template:
@@ -245,6 +254,7 @@ Vue.component("room", {
     }
 });
 
+//Door tile for the room (this will allow to shine the room when it is possible to go to the room)
 Vue.component("door", {
     props:['type', 'name', 'x', 'y', 'width', 'height', 'opacity', 'src'],	
     template:
@@ -302,6 +312,7 @@ Vue.component("door", {
     }
 });
 
+//Warp tile for the corner room
 Vue.component("warp", {
     props:['type', 'name', 'x', 'y', 'width', 'height', 'opacity', 'src'],	
     template:
@@ -339,6 +350,7 @@ Vue.component("warp", {
     }
 });
 
+//Player for the game
 Vue.component('player',{
     props:['type', 'colour'],	
     template:
@@ -367,12 +379,14 @@ Vue.component('player',{
                 {
                     this.$parent.createPath(this.x, this.y, this.$parent.moveamount, "");
                 }
+                //If the player is in a room
                 else if (this.$parent.$children[this.x * GRID_Y + this.y].type === "door" ||
                     this.$parent.$children[this.x * GRID_Y + this.y].type === "room" )
                 {
                     //Get the name and search for all the tiles with the same name and is a door/warp
                     var roomName = this.$parent.$children[this.x * GRID_Y + this.y].name;
                     for (var i = 0; i < GRID_X * GRID_Y; i++) {
+                        //if the door then start the path from that door (multiple door is why we are looping)
                         if (this.$parent.$children[i].type === "door" && 
                             this.$parent.$children[i].name === roomName)
                         {
@@ -382,6 +396,7 @@ Vue.component('player',{
                                 this.$parent.moveamount,
                                 roomName);
                         }
+                        //if there is a warp tile in the room
                         else if (this.$parent.$children[i].type === "warp" && 
                             this.$parent.$children[i].name === roomName)
                         {
@@ -450,6 +465,7 @@ Vue.component('player',{
     }
 });
 
+//Dice for the game (Have the name be dice even though there is only one die)
 Vue.component('dice',{
     props:[],	
     template:
@@ -484,6 +500,7 @@ Vue.component('dice',{
     }
 });
 
+//Suggestion (only when player made it to the room should this appear)
 Vue.component('suggestion', {
     props:[],	
     template:
@@ -528,11 +545,15 @@ Vue.component('suggestion', {
     methods:{
         makeSuggestion: function() {
             console.log(this.charname);
+            //Move the suggested to the room
+
+            //Do note that the roomname is set when the component is live
 
         }
     }
 });
 
+//Start menu where you ask number of players and their colour
 Vue.component('startmenu', {
     props:[],	
     template:
@@ -587,6 +608,7 @@ Vue.component('startmenu', {
         selectColour: function(index, colour) {
             //Cannot use the traditional assignment due to Vue will not update to the view
             //Must have a new memory location
+            this.showerror = false;
             this.selectcolor.splice(index, 1, colour);
         },
         startGame: function() {
@@ -646,6 +668,7 @@ var app = new Vue({
         }
     },
     methods: {
+        //Create the room
         createRoom: function(name, x, y, width, height, imageSrc) {
             //this.tiles[0][0] = {id:id, type: "room", x:x, y:y, src:imageSrc};
             for(var v = 0; v < width; v++) {
@@ -665,10 +688,12 @@ var app = new Vue({
             this.tiles[x][y].height = height * 25;
             this.tiles[x][y].opacity = 1;
         },
+        //Create the start
         createStart: function(x, y, colour) {
             this.tiles[x][y].type = "start";
             this.tiles[x][y].colour = colour;
         },
+        //Create the border
         createBorder: function() {
             //Top Border
             for (var x = 0; x < GRID_X; x++) {
@@ -695,6 +720,7 @@ var app = new Vue({
                 }
             }           
         },
+        //Create the border
         createGoal: function() {
             for(var v = 0; v < 5; v++) {
                 for(var w = 0; w < 7; w++) {
@@ -717,12 +743,18 @@ var app = new Vue({
             this.tiles[11][8].type = "goal";
             this.tiles[12][8].type = "goal";
         },
+        //The start of the path of the player is on and shine all the tile player can make (up, right, down, left)
+        //Recursively call the highlight path on the tile beside the tile you are on
         createPath: function(x, y, amount, avoidName) {
             this.highlightPath(x - 1, y, amount, avoidName);
             this.highlightPath(x, y - 1, amount, avoidName);
             this.highlightPath(x + 1, y, amount, avoidName);
             this.highlightPath(x, y + 1, amount, avoidName);
         },
+        //Start to highlight the path the player can make (Recursive function)
+        //  x, y are the current tile you are checking
+        //  amount is how many can you still go on
+        //  avoidName is for only if you are in room you would not want to shine the room you are in
         highlightPath: function(x, y, amount, avoidName) {
             //if we can't highlight anymore or we are out of the board
             if (amount <= 0 || x < 0 || x >= GRID_X || y < 0 || y >= GRID_Y)  {
@@ -755,6 +787,7 @@ var app = new Vue({
             this.highlightPath(x, y + 1, amount - 1, avoidName);
             //this.$parent.$children[x * GRID_Y + y].ispossible = true;
         },
+        //Get the current player's turn Vue component
         getCurrentPlayer: function() {
             for (var i = 0; i < NUM_PLAYER; i++) {
                 if (this.$children[GRID_X * GRID_Y + i].yourturn) {
@@ -762,6 +795,7 @@ var app = new Vue({
                 }
             }
         },
+        //Turn off the shine
         clearHighlight: function() {
             for (var i = 0; i < GRID_X * GRID_Y; i++) {
                 if (this.$children[i].ispossible) {
@@ -770,10 +804,12 @@ var app = new Vue({
             }
         }
     },
+    //Start to create the board
     created: function() {
         //tile [x][y]
         this.tiles = [];
         var i = 0;
+        //Create the full board as a regular tile 24 X 25 (then manually edit the rest)
         for (var x = 0; x < GRID_X; x++) {
             var row = [];
             for (var y = 0; y < GRID_Y; y++) {
